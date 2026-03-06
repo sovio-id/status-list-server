@@ -1,0 +1,3 @@
+{
+  "extends": "@status-list-server/config/tsconfig.base.json"
+}

@@ -1,0 +1,44 @@
+{
+  "name": "status-list-server",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.2.2",
+      "zod": "^4.1.13",
+      "typescript": "^5",
+      "@types/bun": "^1.3.4"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "build": "bun run --filter '*' build",
+    "check-types": "bun run --filter '*' check-types",
+    "dev:native": "bun run --filter native dev",
+    "dev:web": "bun run --filter web dev",
+    "dev:server": "bun run --filter server dev",
+    "db:push": "bun run --filter @status-list-server/db db:push",
+    "db:studio": "bun run --filter @status-list-server/db db:studio",
+    "db:generate": "bun run --filter @status-list-server/db db:generate",
+    "db:migrate": "bun run --filter @status-list-server/db db:migrate",
+    "db:local": "bun run --filter @status-list-server/db db:local",
+    "check": "oxlint && oxfmt --write"
+  },
+  "dependencies": {
+    "@status-list-server/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@status-list-server/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "oxfmt": "^0.26.0",
+    "oxlint": "^1.41.0",
+    "typescript": "catalog:"
+  },
+  "packageManager": "bun@1.3.2"
+}
