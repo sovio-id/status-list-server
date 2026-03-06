@@ -1,5 +1,5 @@
 {
-  "name": "status-list-server",
+  "name": "status-list-server-1",
   "private": true,
   "workspaces": {
     "packages": [
@@ -26,7 +26,7 @@
     "db:generate": "bun run --filter @status-list-server/db db:generate",
     "db:migrate": "bun run --filter @status-list-server/db db:migrate",
     "db:local": "bun run --filter @status-list-server/db db:local",
-    "check": "oxlint && oxfmt --write"
+    "check": "biome check --write ."
   },
   "dependencies": {
     "@status-list-server/env": "workspace:*",
@@ -34,10 +34,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
     "@status-list-server/config": "workspace:*",
     "@types/bun": "catalog:",
-    "oxfmt": "^0.26.0",
-    "oxlint": "^1.41.0",
     "typescript": "catalog:"
   },
   "packageManager": "bun@1.3.2"
