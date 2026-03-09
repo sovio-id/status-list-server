@@ -19,6 +19,7 @@
     "apps/server": {
       "name": "server",
       "dependencies": {
+        "@sd-jwt/jwt-status-list": "^0.19.0",
         "@status-list-server/db": "workspace:*",
         "@status-list-server/env": "workspace:*",
         "dotenv": "catalog:",
@@ -244,6 +245,12 @@
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.52", "", {}, "sha512-/L0htLJZbaZFL1g9OHOblTxbCYIGefErJjtYOwgl9ZqNx27P3L0SDfjhhHIss32gu5NWgnxuT2a2Hnnv6QGHKA=="],
 
+    "@sd-jwt/jwt-status-list": ["@sd-jwt/jwt-status-list@0.19.0", "", { "dependencies": { "@sd-jwt/types": "0.19.0", "@sd-jwt/utils": "0.19.0", "pako": "^2.1.0" } }, "sha512-Xhh0n0DKe3paEtNNQSScy4dtA0ZVKF2OrmDcIB2jm77Doh4xsSs1pOseGEWBs9fmAe5Y0m082wgkmQnWEV53IQ=="],
+
+    "@sd-jwt/types": ["@sd-jwt/types@0.19.0", "", {}, "sha512-nfuC9zRLKe7o4HSvc+N4ojWRAxo4JGfgcNWpR7bJloLUlnE9eQuu9h9pEaJZht7KRwMpGorNTIdYpoi1btuiew=="],
+
+    "@sd-jwt/utils": ["@sd-jwt/utils@0.19.0", "", { "dependencies": { "@sd-jwt/types": "0.19.0", "js-base64": "^3.7.8" } }, "sha512-bDwDRjfxMBNOsAXY8q8hnxQq7jdOWxrdqTK926Mxt8DN+ttXbXbZIPLwSh84M90WP0V7+WdkXlZD31iISzUR3w=="],
+
     "@status-list-server/config": ["@status-list-server/config@workspace:packages/config"],
 
     "@status-list-server/db": ["@status-list-server/db@workspace:packages/db"],
@@ -323,6 +330,8 @@
     "node-fetch": ["node-fetch@3.3.2", "", { "dependencies": { "data-uri-to-buffer": "^4.0.0", "fetch-blob": "^3.1.4", "formdata-polyfill": "^4.0.10" } }, "sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA=="],
 
     "obug": ["obug@2.1.1", "", {}, "sha512-uTqF9MuPraAQ+IsnPf366RG4cP9RtUi7MLO1N3KEc+wb0a6yKpeL0lmk2IB1jY5KHPAlTc6T/JRdC/YqxHNwkQ=="],
+
+    "pako": ["pako@2.1.0", "", {}, "sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug=="],
 
     "pathe": ["pathe@2.0.3", "", {}, "sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w=="],
 
