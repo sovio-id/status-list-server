@@ -11,27 +11,31 @@ import { apiKeyAuth } from "../middleware/api-key";
 
 const app = new Hono();
 
-const bodySchema = z.object({
+const uuidSchema = z.uuid();
+
+const createStatusListSchema = z.object({
+  id: uuidSchema,
   jwt: z.string().min(1),
 });
 
-const uuidSchema = z.uuid();
+const updateStatusListSchema = z.object({
+  jwt: z.string().min(1),
+});
 
 // POST /status-lists
 app.post(
   "/",
   apiKeyAuth,
   validator("json", (value, c) => {
-    const result = bodySchema.safeParse(value);
+    const result = createStatusListSchema.safeParse(value);
     if (!result.success) {
       return c.json({ error: result.error.issues }, 400);
     }
     return result.data;
   }),
   async (c) => {
-    const { jwt } = c.req.valid("json");
+    const { id, jwt } = c.req.valid("json");
 
-    const id = crypto.randomUUID();
     await insertStatusList({ id, status_list: jwt });
 
     return c.json({ id }, 201);
@@ -43,7 +47,7 @@ app.patch(
   "/:list_id",
   apiKeyAuth,
   validator("json", (value, c) => {
-    const result = bodySchema.safeParse(value);
+    const result = updateStatusListSchema.safeParse(value);
     if (!result.success) {
       return c.json({ error: result.error.issues }, 400);
     }
