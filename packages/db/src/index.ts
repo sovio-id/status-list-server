@@ -4,6 +4,9 @@ import { drizzle } from "drizzle-orm/libsql";
 
 import * as schema from "./schema";
 
+export * from "./queries/status-lists";
+export * from "./schema";
+
 const client = createClient({
   url: env.DATABASE_URL,
 });
