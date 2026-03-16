@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c7f027a5-7dc2-4c42-a568-08626e3aaab4",
+  "id": "506c3d47-1490-4c5b-ad37-ad3439f7c49c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "status_lists": {
@@ -21,20 +21,13 @@
           "notNull": true,
           "autoincrement": false
         },
-        "assigned_indexes": {
-          "name": "assigned_indexes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\"2026-03-09T08:39:35.571Z\"'"
+          "default": "'\"2026-03-13T06:41:42.596Z\"'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -42,7 +35,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'\"2026-03-09T08:39:35.571Z\"'"
+          "default": "'\"2026-03-13T06:41:42.596Z\"'"
         }
       },
       "indexes": {},
