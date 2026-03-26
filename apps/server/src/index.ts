@@ -16,7 +16,11 @@ app.use(
 );
 
 app.get("/", (c) => {
-  return c.text("OK");
+  return c.html("Status List Server");
+});
+
+app.get("/health", (c) => {
+  return c.json({ status: "ok" });
 });
 
 app.route("/status-lists", statusListsRoute);
