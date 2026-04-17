@@ -1,6 +1,6 @@
 # status-list-server
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Hono, and more.
+A lightweight server for managing [JWT Status Lists](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.txt), enabling credential issuers to publish and update the revocation/suspension status of verifiable credentials.
 
 ## Features
 
@@ -8,30 +8,42 @@ This project was created with [Better-T-Stack](https://github.com/AmanVarshney01
 - **Hono** - Lightweight, performant server framework
 - **Bun** - Runtime environment
 - **Drizzle** - TypeScript-first ORM
-- **SQLite/Turso** - Database engine
-- **Oxlint** - Oxlint + Oxfmt (linting & formatting)
+- **SQLite** - File-based database engine
+- **Biome** - Linting & formatting
 
 ## Getting Started
 
-First, install the dependencies:
+Install the dependencies:
 
 ```bash
 bun install
 ```
 
-## Database Setup
+## Environment Variables
 
-This project uses SQLite with Drizzle ORM.
+Create a `.env` file in the `apps/server` directory with the following variables:
 
-1. Start the local SQLite database (optional):
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | SQLite database file path (e.g. `file:local.db`) |
+| `CORS_ORIGIN` | Yes | Allowed CORS origin URL (e.g. `http://localhost:3000`) |
+| `API_KEY` | Yes | Secret key used to authenticate write requests via the `x-api-key` header |
+| `NODE_ENV` | No | Runtime environment — `development`, `production`, or `test` (default: `development`) |
 
-```bash
-bun run db:local
+Example `.env`:
+
+```env
+DATABASE_URL=file:local.db
+CORS_ORIGIN=http://localhost:3000
+API_KEY=your-secret-api-key
+NODE_ENV=development
 ```
 
-2. Update your `.env` file in the `apps/server` directory with the appropriate connection details if needed.
+## Database Setup
 
-3. Apply the schema to your database:
+This project uses SQLite (file-based) with Drizzle ORM. Migrations run automatically on server startup.
+
+1. Apply the schema to your database:
 
 ```bash
 bun run db:push
@@ -45,30 +57,72 @@ bun run dev
 
 The API is running at [http://localhost:3000](http://localhost:3000).
 
-## Git Hooks and Formatting
+## API Endpoints
 
-- Format and lint fix: `bun run check`
+All write endpoints require the `x-api-key` header with the configured `API_KEY` value.
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/health` | None | Health check |
+| `POST` | `/status-lists` | Required | Create a new status list |
+| `PATCH` | `/status-lists/:list_id` | Required | Update an existing status list |
+| `GET` | `/status-lists/:list_id` | None | Retrieve a status list JWT |
+
+### POST /status-lists
+
+```json
+{
+  "id": "<uuid>",
+  "jwt": "<status-list-jwt>"
+}
+```
+
+### PATCH /status-lists/:list_id
+
+```json
+{
+  "jwt": "<updated-status-list-jwt>"
+}
+```
+
+`GET /status-lists/:list_id` returns the status list as `application/statuslist+jwt`.
+
+## Docker
+
+Build and run with Docker:
+
+```bash
+docker build -t status-list-server .
+docker run -p 3000:3000 \
+  -e DATABASE_URL=file:local.db \
+  -e CORS_ORIGIN=http://localhost:3000 \
+  -e API_KEY=your-secret-api-key \
+  status-list-server
+```
 
 ## Project Structure
 
 ```
 status-list-server/
 ├── apps/
-│   └── server/      # Backend API (Hono)
+│   └── server/          # Backend API (Hono)
 ├── packages/
-│   └── db/          # Database schema & queries
+│   ├── db/              # Database schema, migrations & queries
+│   └── env/             # Environment variable validation
 ```
 
 ## Available Scripts
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:push`: Push schema changes to database
-- `bun run db:generate`: Generate database client/types
-- `bun run db:migrate`: Run database migrations
-- `bun run db:studio`: Open database studio UI
-- `bun run db:local`: Start the local SQLite database
-- `bun run check`: Run Oxlint and Oxfmt
+| Script | Description |
+|---|---|
+| `bun run dev` | Start the server in development mode |
+| `bun run dev:server` | Start only the server |
+| `bun run build` | Build all packages |
+| `bun run check-types` | Check TypeScript types across all packages |
+| `bun run db:push` | Push schema changes to the database |
+| `bun run db:generate` | Generate Drizzle migration files |
+| `bun run db:migrate` | Run database migrations |
+| `bun run db:studio` | Open Drizzle Studio UI |
+| `bun run db:local` | Start the local SQLite database |
+| `bun run style:check` | Run Biome linter and formatter check |
+| `bun run style:fix` | Run Biome linter and auto-fix formatting |
