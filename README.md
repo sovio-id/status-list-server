@@ -1,6 +1,6 @@
 # status-list-server
 
-A lightweight server for managing [JWT Status Lists](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.txt), enabling credential issuers to publish and update the revocation/suspension status of verifiable credentials.
+A lightweight server for managing [Token Status List (TSL)](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list), enabling credential issuers to publish and update the revocation/suspension status of verifiable credentials.
 
 ## Features
 
