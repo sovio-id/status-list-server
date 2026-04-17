@@ -26,7 +26,6 @@ Create a `.env` file in the `apps/server` directory with the following variables
 | Variable | Required | Description |
 |---|---|---|
 | `DATABASE_URL` | Yes | SQLite database file path (e.g. `file:local.db`) |
-| `CORS_ORIGIN` | Yes | Allowed CORS origin URL (e.g. `http://localhost:3000`) |
 | `API_KEY` | Yes | Secret key used to authenticate write requests via the `x-api-key` header |
 | `NODE_ENV` | No | Runtime environment — `development`, `production`, or `test` (default: `development`) |
 
@@ -34,7 +33,6 @@ Example `.env`:
 
 ```env
 DATABASE_URL=file:local.db
-CORS_ORIGIN=http://localhost:3000
 API_KEY=your-secret-api-key
 NODE_ENV=development
 ```
@@ -89,7 +87,6 @@ Build and run with Docker:
 docker build -t status-list-server .
 docker run -p 3000:3000 \
   -e DATABASE_URL=file:local.db \
-  -e CORS_ORIGIN=http://localhost:3000 \
   -e API_KEY=your-secret-api-key \
   status-list-server
 ```
