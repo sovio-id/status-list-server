@@ -41,15 +41,9 @@ NODE_ENV=development
 
 ## Database Setup
 
-This project uses SQLite (file-based) with Drizzle ORM. Migrations run automatically on server startup.
+This project uses SQLite (file-based) with Drizzle ORM. Migrations run automatically on server startup — no manual setup required.
 
-1. Apply the schema to your database:
-
-```bash
-bun run db:push
-```
-
-Then, run the development server:
+Run the development server:
 
 ```bash
 bun run dev
@@ -116,12 +110,10 @@ status-list-server/
 | Script | Description |
 |---|---|
 | `bun run dev` | Start the server in development mode |
-| `bun run dev:server` | Start only the server |
 | `bun run build` | Build all packages |
 | `bun run check-types` | Check TypeScript types across all packages |
-| `bun run db:push` | Push schema changes to the database |
 | `bun run db:generate` | Generate Drizzle migration files |
-| `bun run db:migrate` | Run database migrations |
+| `bun run db:migrate` | Run database migrations manually |
 | `bun run db:studio` | Open Drizzle Studio UI |
 | `bun run style:check` | Run Biome linter and formatter check |
 | `bun run style:fix` | Run Biome linter and auto-fix formatting |
