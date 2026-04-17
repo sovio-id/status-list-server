@@ -123,6 +123,5 @@ status-list-server/
 | `bun run db:generate` | Generate Drizzle migration files |
 | `bun run db:migrate` | Run database migrations |
 | `bun run db:studio` | Open Drizzle Studio UI |
-| `bun run db:local` | Start the local SQLite database |
 | `bun run style:check` | Run Biome linter and formatter check |
 | `bun run style:fix` | Run Biome linter and auto-fix formatting |
