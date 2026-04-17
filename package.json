@@ -18,12 +18,9 @@
     "dev": "bun run --filter '*' dev",
     "build": "bun run --filter '*' build",
     "check-types": "bun run --filter '*' check-types",
-    "dev:server": "bun run --filter server dev",
-    "db:push": "bun run --filter @status-list-server/db db:push",
     "db:studio": "bun run --filter @status-list-server/db db:studio",
     "db:generate": "bun run --filter @status-list-server/db db:generate",
     "db:migrate": "bun run --filter @status-list-server/db db:migrate",
-    "db:local": "bun run --filter @status-list-server/db db:local",
     "style:check": "biome check .",
     "style:fix": "biome check --write ."
   },
