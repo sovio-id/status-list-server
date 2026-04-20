@@ -7,7 +7,9 @@
     "check-types": "tsc -b",
     "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
     "dev": "bun run --hot src/index.ts",
-    "start": "bun run dist/index.mjs"
+    "start": "bun run dist/index.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@sd-jwt/jwt-status-list": "^0.19.0",
@@ -20,7 +22,9 @@
   "devDependencies": {
     "@status-list-server/config": "workspace:*",
     "@types/bun": "catalog:",
+    "@vitest/coverage-v8": "^4.1.4",
     "tsdown": "^0.16.5",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^4.1.4"
   }
 }

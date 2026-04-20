@@ -36,6 +36,12 @@ app.post(
   async (c) => {
     const { id, jwt } = c.req.valid("json");
 
+    try {
+      getListFromStatusListJWT(jwt);
+    } catch {
+      return c.json({ error: "Invalid status list JWT" }, 400);
+    }
+
     await insertStatusList({ id, status_list: jwt });
 
     return c.json({ id }, 201);
@@ -68,10 +74,14 @@ app.patch(
       return c.json({ error: "Not found" }, 404);
     }
 
-    const existingBits = getListFromStatusListJWT(
-      row.status_list,
-    ).getBitsPerStatus();
-    const newBits = getListFromStatusListJWT(jwt).getBitsPerStatus();
+    let existingBits: number;
+    let newBits: number;
+    try {
+      existingBits = getListFromStatusListJWT(row.status_list).getBitsPerStatus();
+      newBits = getListFromStatusListJWT(jwt).getBitsPerStatus();
+    } catch {
+      return c.json({ error: "Invalid status list JWT" }, 400);
+    }
 
     if (existingBits !== newBits) {
       return c.json({ error: "bits cannot be changed after creation" }, 400);
