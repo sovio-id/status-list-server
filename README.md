@@ -27,7 +27,7 @@ Create a `.env` file in the `apps/server` directory with the following variables
 |---|---|---|
 | `DATABASE_URL` | Yes | SQLite database file path (e.g. `file:local.db`) |
 | `API_KEY` | Yes | Secret key used to authenticate write requests via the `x-api-key` header |
-| `PORT` | No | Port the server listens on (default: `3000`) |
+| `PORT` | Yes | Port the server listens on |
 
 Example `.env`:
 
