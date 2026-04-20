@@ -83,6 +83,15 @@ describe("POST /status-lists", () => {
     expect(body).toHaveProperty("error");
   });
 
+  it("returns 400 when jwt is not a valid status list JWT", async () => {
+    const res = await app.request(
+      "/status-lists",
+      json({ id: TEST_UUID, jwt: "header.payload.sig" }, { "x-api-key": API_KEY }),
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Invalid status list JWT" });
+  });
+
   it("creates a status list and returns 201 with id", async () => {
     const jwt = createTestStatusListJwt();
     const res = await app.request(

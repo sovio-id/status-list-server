@@ -36,6 +36,12 @@ app.post(
   async (c) => {
     const { id, jwt } = c.req.valid("json");
 
+    try {
+      getListFromStatusListJWT(jwt);
+    } catch {
+      return c.json({ error: "Invalid status list JWT" }, 400);
+    }
+
     await insertStatusList({ id, status_list: jwt });
 
     return c.json({ id }, 201);
