@@ -27,14 +27,14 @@ Create a `.env` file in the `apps/server` directory with the following variables
 |---|---|---|
 | `DATABASE_URL` | Yes | SQLite database file path (e.g. `file:local.db`) |
 | `API_KEY` | Yes | Secret key used to authenticate write requests via the `x-api-key` header |
-| `NODE_ENV` | No | Runtime environment — `development`, `production`, or `test` (default: `development`) |
+| `PORT` | No | Port the server listens on (default: `3000`) |
 
 Example `.env`:
 
 ```env
 DATABASE_URL=file:local.db
 API_KEY=your-secret-api-key
-NODE_ENV=development
+PORT=3000
 ```
 
 ## Database Setup
@@ -88,6 +88,16 @@ docker build -t status-list-server .
 docker run -p 3000:3000 \
   -e DATABASE_URL=file:local.db \
   -e API_KEY=your-secret-api-key \
+  status-list-server
+```
+
+To use a custom port:
+
+```bash
+docker run -p 8080:8080 \
+  -e DATABASE_URL=file:local.db \
+  -e API_KEY=your-secret-api-key \
+  -e PORT=8080 \
   status-list-server
 ```
 
