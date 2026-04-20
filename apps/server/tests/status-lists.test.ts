@@ -161,6 +161,26 @@ describe("PATCH /status-lists/:list_id", () => {
     expect(await res.json()).toEqual({ error: "Not found" });
   });
 
+  it("returns 400 when jwt is not a valid status list JWT", async () => {
+    const validJwt = createTestStatusListJwt();
+    await app.request(
+      "/status-lists",
+      json({ id: TEST_UUID, jwt: validJwt }, { "x-api-key": API_KEY }),
+    );
+
+    const invalidJwt = "header.payload.sig";
+    const res = await app.request(
+      `/status-lists/${TEST_UUID}`,
+      new Request("http://localhost", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+        body: JSON.stringify({ jwt: invalidJwt }),
+      }),
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Invalid status list JWT" });
+  });
+
   it("returns 400 when bits_per_status changes", async () => {
     const jwt1bit = createTestStatusListJwt(1);
     await app.request(
