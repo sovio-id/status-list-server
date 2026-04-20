@@ -1,3 +1,4 @@
+import { env } from "@status-list-server/env/server";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { statusListsRoute } from "./routes/status-lists";
@@ -16,4 +17,7 @@ app.get("/health", (c) => {
 
 app.route("/status-lists", statusListsRoute);
 
-export default app;
+export default {
+  port: env.PORT,
+  fetch: app.fetch,
+};
