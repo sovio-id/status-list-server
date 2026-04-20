@@ -9,6 +9,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),
+    PORT: z.coerce.number().int().positive().default(3000),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,
