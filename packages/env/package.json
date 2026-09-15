@@ -1,5 +1,6 @@
 {
   "name": "@status-list-server/env",
+  "license": "SEE LICENSE IN LICENSE",
   "version": "0.0.0",
   "private": true,
   "type": "module",

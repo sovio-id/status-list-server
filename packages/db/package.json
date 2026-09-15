@@ -1,5 +1,6 @@
 {
   "name": "@status-list-server/db",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "exports": {
     ".": {

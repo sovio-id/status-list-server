@@ -124,3 +124,11 @@ status-list-server/
 | `bun run db:studio` | Open Drizzle Studio UI |
 | `bun run style:check` | Run Biome linter and formatter check |
 | `bun run style:fix` | Run Biome linter and auto-fix formatting |
+
+## License
+
+Copyright © 2026 AYANWORKS. All rights reserved.
+
+This project is licensed under the [Sovio Platform License](https://github.com/sovio-id/.github/blob/main/LICENSE), a proprietary commercial license governing SaaS, AWS Marketplace, and on-premises deployments.
+
+See also the [open-source component licensing policy](https://github.com/sovio-id/.github/blob/main/LICENSE-OPENSOURCE.md).
