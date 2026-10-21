@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.2-alpine AS build
+FROM oven/bun:1.4.3-alpine AS build
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY apps/server/package.json ./apps/server/
@@ -9,7 +9,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
-FROM oven/bun:1.3.2-alpine AS runner
+FROM oven/bun:1.4.3-alpine AS runner
 WORKDIR /app
 COPY --from=build /app/apps/server/dist ./dist
 COPY --from=build /app/packages/db/src/migrations ./dist/migrations
