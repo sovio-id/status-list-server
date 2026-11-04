@@ -14,4 +14,6 @@ const client = createClient({
 
 export const db = drizzle({ client, schema });
 
-await migrate(db, { migrationsFolder: new URL("./migrations", import.meta.url).pathname });
+await migrate(db, {
+  migrationsFolder: new URL("./migrations", import.meta.url).pathname,
+});

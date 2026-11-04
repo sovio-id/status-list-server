@@ -17,6 +17,8 @@ app.get("/health", (c) => {
 
 app.route("/status-lists", statusListsRoute);
 
+export { app };
+
 export default {
   port: env.PORT,
   fetch: app.fetch,

@@ -2,15 +2,19 @@ import { eq } from "drizzle-orm";
 import { db } from "../index";
 import { statusListsTable } from "../schema";
 
+export type StatusListFormat = "token" | "bitstring";
+
 export type NewStatusList = {
   id: string;
   status_list: string;
+  format: StatusListFormat;
 };
 
 export async function insertStatusList(data: NewStatusList) {
   await db.insert(statusListsTable).values({
     id: data.id,
     status_list: data.status_list,
+    format: data.format,
   });
 }
 
