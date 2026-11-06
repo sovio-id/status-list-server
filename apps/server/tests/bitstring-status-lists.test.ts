@@ -270,3 +270,71 @@ describe("GET /status-lists/:list_id (bitstring)", () => {
     expect(await res.json()).toEqual(vc);
   });
 });
+
+describe("PATCH /status-lists/:list_id optimistic concurrency", () => {
+  it("returns and increments the ETag version", async () => {
+    await app.request(
+      "/status-lists",
+      json(
+        { id: TEST_UUID, vc: createTestBitstringCredential() },
+        { "x-api-key": API_KEY },
+      ),
+    );
+
+    const getBefore = await app.request(`/status-lists/${TEST_UUID}`);
+    expect(getBefore.headers.get("etag")).toBe('"0"');
+
+    const patchRes = await app.request(
+      `/status-lists/${TEST_UUID}`,
+      patch(
+        { vc: createTestBitstringCredential() },
+        { "x-api-key": API_KEY, "if-match": '"0"' },
+      ),
+    );
+    expect(patchRes.status).toBe(200);
+    expect(patchRes.headers.get("etag")).toBe('"1"');
+
+    const getAfter = await app.request(`/status-lists/${TEST_UUID}`);
+    expect(getAfter.headers.get("etag")).toBe('"1"');
+  });
+
+  it("rejects a stale If-Match with 412", async () => {
+    await app.request(
+      "/status-lists",
+      json(
+        { id: TEST_UUID, vc: createTestBitstringCredential() },
+        { "x-api-key": API_KEY },
+      ),
+    );
+
+    const res = await app.request(
+      `/status-lists/${TEST_UUID}`,
+      patch(
+        { vc: createTestBitstringCredential() },
+        { "x-api-key": API_KEY, "if-match": '"5"' },
+      ),
+    );
+    expect(res.status).toBe(412);
+    expect(await res.json()).toEqual({ error: "Status list has been modified" });
+  });
+
+  it("rejects a malformed If-Match with 400", async () => {
+    await app.request(
+      "/status-lists",
+      json(
+        { id: TEST_UUID, vc: createTestBitstringCredential() },
+        { "x-api-key": API_KEY },
+      ),
+    );
+
+    const res = await app.request(
+      `/status-lists/${TEST_UUID}`,
+      patch(
+        { vc: createTestBitstringCredential() },
+        { "x-api-key": API_KEY, "if-match": "nope" },
+      ),
+    );
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "Invalid If-Match header" });
+  });
+});

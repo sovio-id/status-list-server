@@ -115,6 +115,22 @@ const getStatusSize = (vc: BitstringStatusListCredential): number => {
   return subject?.statusSize ?? 1;
 };
 
+const parseIfMatch = (header: string | undefined): number | undefined => {
+  if (!header) {
+    return undefined;
+  }
+
+  const match = header.trim().match(/^(?:W\/)?"(\d+)"$/);
+  if (!match) {
+    return undefined;
+  }
+
+  const version = Number(match[1]);
+  return Number.isSafeInteger(version) ? version : undefined;
+};
+
+const etag = (version: number): string => `"${version}"`;
+
 // POST /status-lists
 app.post(
   "/",
@@ -181,6 +197,15 @@ app.patch(
       return c.json({ error: "Not found" }, 404);
     }
 
+    const ifMatchHeader = c.req.header("if-match");
+    const expectedVersion = parseIfMatch(ifMatchHeader);
+    if (ifMatchHeader && expectedVersion === undefined) {
+      return c.json({ error: "Invalid If-Match header" }, 400);
+    }
+    if (expectedVersion !== undefined && expectedVersion !== row.version) {
+      return c.json({ error: "Status list has been modified" }, 412);
+    }
+
     const payloadFormat: StatusListFormat =
       "jwt" in data ? "token" : "bitstring";
 
@@ -207,9 +232,16 @@ app.patch(
         return c.json({ error: "bits cannot be changed after creation" }, 400);
       }
 
-      await updateStatusList(listId, data.jwt);
+      const updated = await updateStatusList(
+        listId,
+        data.jwt,
+        row.version,
+      );
+      if (!updated) {
+        return c.json({ error: "Status list has been modified" }, 412);
+      }
 
-      return c.json({ id: listId }, 200);
+      return c.json({ id: listId }, 200, { ETag: etag(updated.version) });
     }
 
     let storedStatusSize: number | undefined;
@@ -234,9 +266,16 @@ app.patch(
       );
     }
 
-    await updateStatusList(listId, JSON.stringify(data.vc));
+    const updated = await updateStatusList(
+      listId,
+      JSON.stringify(data.vc),
+      row.version,
+    );
+    if (!updated) {
+      return c.json({ error: "Status list has been modified" }, 412);
+    }
 
-    return c.json({ id: listId }, 200);
+    return c.json({ id: listId }, 200, { ETag: etag(updated.version) });
   },
 );
 
@@ -257,11 +296,15 @@ app.get("/:list_id", async (c) => {
   if (row.format === "bitstring") {
     return c.body(row.status_list, 200, {
       "Content-Type": BITSTRING_CONTENT_TYPE,
+      "Cache-Control": "no-store",
+      ETag: etag(row.version),
     });
   }
 
   return c.text(row.status_list, 200, {
     "Content-Type": TOKEN_CONTENT_TYPE,
+    "Cache-Control": "no-store",
+    ETag: etag(row.version),
   });
 });
 

@@ -22,6 +22,13 @@
       "when": 1793690130121,
       "tag": "0002_green_old_lace",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1796000000000,
+      "tag": "0003_add_status_list_version",
+      "breakpoints": true
     }
   ]
 }

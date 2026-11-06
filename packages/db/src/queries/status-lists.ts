@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "../index";
 import { statusListsTable } from "../schema";
 
@@ -35,9 +35,27 @@ export async function statusListExists(id: string) {
   return row !== undefined;
 }
 
-export async function updateStatusList(id: string, jwt: string) {
-  await db
+export async function updateStatusList(
+  id: string,
+  statusList: string,
+  expectedVersion?: number,
+) {
+  const where =
+    expectedVersion === undefined
+      ? eq(statusListsTable.id, id)
+      : and(
+          eq(statusListsTable.id, id),
+          eq(statusListsTable.version, expectedVersion),
+        );
+
+  const rows = await db
     .update(statusListsTable)
-    .set({ status_list: jwt })
-    .where(eq(statusListsTable.id, id));
+    .set({
+      status_list: statusList,
+      version: sql`${statusListsTable.version} + 1`,
+    })
+    .where(where)
+    .returning({ version: statusListsTable.version });
+
+  return rows[0];
 }

@@ -5,6 +5,7 @@ export const statusListsTable = sqliteTable("status_lists", {
   id: text("id").primaryKey(),
   status_list: text("status_list").notNull(),
   format: text("format").notNull().default("token"),
+  version: integer("version").notNull().default(0),
   created_at: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
