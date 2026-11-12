@@ -1,7 +1,9 @@
+import { gunzipSync } from "node:zlib";
 import { getListFromStatusListJWT } from "@sd-jwt/jwt-status-list";
 import {
   getStatusListById,
   insertStatusList,
+  type StatusListFormat,
   updateStatusList,
 } from "@status-list-server/db";
 import { Hono } from "hono";
@@ -13,14 +15,121 @@ const app = new Hono();
 
 const uuidSchema = z.uuid();
 
-const createStatusListSchema = z.object({
+const TOKEN_CONTENT_TYPE = "application/statuslist+jwt";
+const BITSTRING_CONTENT_TYPE = "application/ld+json";
+
+const VCDM_V2_CONTEXT = "https://www.w3.org/ns/credentials/v2";
+
+const MIN_BITSTRING_LENGTH = 131072;
+
+const isValidEncodedList = (encodedList: string): boolean => {
+  if (!encodedList.startsWith("u")) {
+    return false;
+  }
+
+  try {
+    const raw = gunzipSync(Buffer.from(encodedList.slice(1), "base64url"));
+    return raw.length * 8 >= MIN_BITSTRING_LENGTH;
+  } catch {
+    return false;
+  }
+};
+
+const toArray = (value: string | string[]): string[] =>
+  Array.isArray(value) ? value : [value];
+
+const typeSchema = z.union([z.string(), z.array(z.string())]);
+
+const bitstringCredentialSubjectSchema = z
+  .looseObject({
+    id: z.string().optional(),
+    type: typeSchema,
+    statusPurpose: z.string().min(1),
+    encodedList: z.string().min(1).refine(isValidEncodedList, {
+      message:
+        "encodedList must be a multibase 'u' base64url gzip of at least 131072 bits",
+    }),
+    statusSize: z.number().int().positive().optional(),
+    ttl: z.number().int().positive().optional(),
+  })
+  .refine((subject) => toArray(subject.type).includes("BitstringStatusList"), {
+    message: "credentialSubject.type must include 'BitstringStatusList'",
+  });
+
+const bitstringStatusListCredentialSchema = z
+  .looseObject({
+    "@context": z.union([z.string(), z.array(z.string())]),
+    id: z.string().optional(),
+    type: typeSchema,
+    issuer: z.union([z.string(), z.looseObject({ id: z.string() })]),
+    validFrom: z.string().optional(),
+    validUntil: z.string().optional(),
+    credentialSubject: z.union([
+      bitstringCredentialSubjectSchema,
+      z.array(bitstringCredentialSubjectSchema).min(1),
+    ]),
+  })
+  .refine((vc) => toArray(vc.type).includes("BitstringStatusListCredential"), {
+    message: "type must include 'BitstringStatusListCredential'",
+  })
+  .refine((vc) => toArray(vc["@context"]).includes(VCDM_V2_CONTEXT), {
+    message: `@context must include '${VCDM_V2_CONTEXT}'`,
+  });
+
+type BitstringStatusListCredential = z.infer<
+  typeof bitstringStatusListCredentialSchema
+>;
+
+const tokenCreateSchema = z.strictObject({
   id: uuidSchema,
   jwt: z.string().min(1),
 });
 
-const updateStatusListSchema = z.object({
+const bitstringCreateSchema = z.strictObject({
+  id: uuidSchema,
+  vc: bitstringStatusListCredentialSchema,
+});
+
+const createStatusListSchema = z.union([
+  tokenCreateSchema,
+  bitstringCreateSchema,
+]);
+
+const tokenUpdateSchema = z.strictObject({
   jwt: z.string().min(1),
 });
+
+const bitstringUpdateSchema = z.strictObject({
+  vc: bitstringStatusListCredentialSchema,
+});
+
+const updateStatusListSchema = z.union([
+  tokenUpdateSchema,
+  bitstringUpdateSchema,
+]);
+
+const getStatusSize = (vc: BitstringStatusListCredential): number => {
+  const subject = Array.isArray(vc.credentialSubject)
+    ? vc.credentialSubject[0]
+    : vc.credentialSubject;
+  return subject?.statusSize ?? 1;
+};
+
+const parseIfMatch = (header: string | undefined): number | undefined => {
+  if (!header) {
+    return undefined;
+  }
+
+  const match = header.trim().match(/^(?:W\/)?"(\d+)"$/);
+  if (!match) {
+    return undefined;
+  }
+
+  const version = Number(match[1]);
+  return Number.isSafeInteger(version) ? version : undefined;
+};
+
+const etag = (version: number): string => `"${version}"`;
 
 // POST /status-lists
 app.post(
@@ -34,17 +143,31 @@ app.post(
     return result.data;
   }),
   async (c) => {
-    const { id, jwt } = c.req.valid("json");
+    const data = c.req.valid("json");
 
-    try {
-      getListFromStatusListJWT(jwt);
-    } catch {
-      return c.json({ error: "Invalid status list JWT" }, 400);
+    if ("jwt" in data) {
+      try {
+        getListFromStatusListJWT(data.jwt);
+      } catch {
+        return c.json({ error: "Invalid status list JWT" }, 400);
+      }
+
+      await insertStatusList({
+        id: data.id,
+        status_list: data.jwt,
+        format: "token",
+      });
+
+      return c.json({ id: data.id }, 201);
     }
 
-    await insertStatusList({ id, status_list: jwt });
+    await insertStatusList({
+      id: data.id,
+      status_list: JSON.stringify(data.vc),
+      format: "bitstring",
+    });
 
-    return c.json({ id }, 201);
+    return c.json({ id: data.id }, 201);
   },
 );
 
@@ -66,7 +189,7 @@ app.patch(
       return c.json({ error: "Invalid list ID" }, 400);
     }
 
-    const { jwt } = c.req.valid("json");
+    const data = c.req.valid("json");
 
     const row = await getStatusListById(listId);
 
@@ -74,22 +197,85 @@ app.patch(
       return c.json({ error: "Not found" }, 404);
     }
 
-    let existingBits: number;
-    let newBits: number;
+    const ifMatchHeader = c.req.header("if-match");
+    const expectedVersion = parseIfMatch(ifMatchHeader);
+    if (ifMatchHeader && expectedVersion === undefined) {
+      return c.json({ error: "Invalid If-Match header" }, 400);
+    }
+    if (expectedVersion !== undefined && expectedVersion !== row.version) {
+      return c.json({ error: "Status list has been modified" }, 412);
+    }
+
+    const payloadFormat: StatusListFormat =
+      "jwt" in data ? "token" : "bitstring";
+
+    if (row.format !== payloadFormat) {
+      return c.json(
+        { error: "Payload format does not match stored format" },
+        400,
+      );
+    }
+
+    if ("jwt" in data) {
+      let existingBits: number;
+      let newBits: number;
+      try {
+        existingBits = getListFromStatusListJWT(
+          row.status_list,
+        ).getBitsPerStatus();
+        newBits = getListFromStatusListJWT(data.jwt).getBitsPerStatus();
+      } catch {
+        return c.json({ error: "Invalid status list JWT" }, 400);
+      }
+
+      if (existingBits !== newBits) {
+        return c.json({ error: "bits cannot be changed after creation" }, 400);
+      }
+
+      const updated = await updateStatusList(
+        listId,
+        data.jwt,
+        row.version,
+      );
+      if (!updated) {
+        return c.json({ error: "Status list has been modified" }, 412);
+      }
+
+      return c.json({ id: listId }, 200, { ETag: etag(updated.version) });
+    }
+
+    let storedStatusSize: number | undefined;
     try {
-      existingBits = getListFromStatusListJWT(row.status_list).getBitsPerStatus();
-      newBits = getListFromStatusListJWT(jwt).getBitsPerStatus();
+      const stored = bitstringStatusListCredentialSchema.safeParse(
+        JSON.parse(row.status_list),
+      );
+      storedStatusSize = stored.success
+        ? getStatusSize(stored.data)
+        : undefined;
     } catch {
-      return c.json({ error: "Invalid status list JWT" }, 400);
+      storedStatusSize = undefined;
     }
 
-    if (existingBits !== newBits) {
-      return c.json({ error: "bits cannot be changed after creation" }, 400);
+    if (
+      storedStatusSize !== undefined &&
+      storedStatusSize !== getStatusSize(data.vc)
+    ) {
+      return c.json(
+        { error: "statusSize cannot be changed after creation" },
+        400,
+      );
     }
 
-    await updateStatusList(listId, jwt);
+    const updated = await updateStatusList(
+      listId,
+      JSON.stringify(data.vc),
+      row.version,
+    );
+    if (!updated) {
+      return c.json({ error: "Status list has been modified" }, 412);
+    }
 
-    return c.json({ id: listId }, 200);
+    return c.json({ id: listId }, 200, { ETag: etag(updated.version) });
   },
 );
 
@@ -107,8 +293,18 @@ app.get("/:list_id", async (c) => {
     return c.json({ error: "Not found" }, 404);
   }
 
+  if (row.format === "bitstring") {
+    return c.body(row.status_list, 200, {
+      "Content-Type": BITSTRING_CONTENT_TYPE,
+      "Cache-Control": "no-store",
+      ETag: etag(row.version),
+    });
+  }
+
   return c.text(row.status_list, 200, {
-    "Content-Type": "application/statuslist+jwt",
+    "Content-Type": TOKEN_CONTENT_TYPE,
+    "Cache-Control": "no-store",
+    ETag: etag(row.version),
   });
 });
 
