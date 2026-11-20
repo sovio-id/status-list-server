@@ -232,11 +232,7 @@ app.patch(
         return c.json({ error: "bits cannot be changed after creation" }, 400);
       }
 
-      const updated = await updateStatusList(
-        listId,
-        data.jwt,
-        row.version,
-      );
+      const updated = await updateStatusList(listId, data.jwt, row.version);
       if (!updated) {
         return c.json({ error: "Status list has been modified" }, 412);
       }

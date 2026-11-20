@@ -7,6 +7,7 @@
       "dependencies": {
         "@status-list-server/env": "workspace:*",
         "dotenv": "catalog:",
+        "postgres": "^3.4.7",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -42,11 +43,10 @@
     "packages/db": {
       "name": "@status-list-server/db",
       "dependencies": {
-        "@libsql/client": "0.15.15",
         "@status-list-server/env": "workspace:*",
         "dotenv": "catalog:",
         "drizzle-orm": "^0.45.1",
-        "libsql": "0.5.22",
+        "postgres": "^3.4.7",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -426,6 +426,8 @@
     "picomatch": ["picomatch@4.0.3", "", {}, "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q=="],
 
     "postcss": ["postcss@8.5.10", "", { "dependencies": { "nanoid": "^3.3.11", "picocolors": "^1.1.1", "source-map-js": "^1.2.1" } }, "sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ=="],
+
+    "postgres": ["postgres@3.4.9", "", {}, "sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw=="],
 
     "promise-limit": ["promise-limit@2.7.0", "", {}, "sha512-7nJ6v5lnJsXwGprnGXga4wx6d1POjvi5Qmf1ivTRxTjH4Z/9Czja/UCMLVmB9N93GeWOU93XaFaEt6jbuoagNw=="],
 

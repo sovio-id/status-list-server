@@ -315,7 +315,9 @@ describe("PATCH /status-lists/:list_id optimistic concurrency", () => {
       ),
     );
     expect(res.status).toBe(412);
-    expect(await res.json()).toEqual({ error: "Status list has been modified" });
+    expect(await res.json()).toEqual({
+      error: "Status list has been modified",
+    });
   });
 
   it("rejects a malformed If-Match with 400", async () => {

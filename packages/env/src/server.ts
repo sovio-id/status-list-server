@@ -4,7 +4,13 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+    DATABASE_URL: z
+      .string()
+      .min(1, "DATABASE_URL is required")
+      .refine(
+        (value) => /^postgres(?:ql)?:\/\//.test(value),
+        "DATABASE_URL must be a PostgreSQL URL",
+      ),
     API_KEY: z.string().min(1, "API_KEY is required"),
     PORT: z.coerce
       .number({ error: "PORT is required" })

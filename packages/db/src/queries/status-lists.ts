@@ -19,20 +19,21 @@ export async function insertStatusList(data: NewStatusList) {
 }
 
 export async function getStatusListById(id: string) {
-  return db
+  const rows = await db
     .select()
     .from(statusListsTable)
     .where(eq(statusListsTable.id, id))
-    .get();
+    .limit(1);
+  return rows[0];
 }
 
 export async function statusListExists(id: string) {
-  const row = await db
+  const rows = await db
     .select({ id: statusListsTable.id })
     .from(statusListsTable)
     .where(eq(statusListsTable.id, id))
-    .get();
-  return row !== undefined;
+    .limit(1);
+  return rows[0] !== undefined;
 }
 
 export async function updateStatusList(

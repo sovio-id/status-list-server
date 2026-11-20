@@ -5,8 +5,3 @@ services:
       - "${PORT:-3000}:${PORT:-3000}"
     env_file:
       - .env
-    volumes:
-      - db-data:/app/data
-
-volumes:
-  db-data:

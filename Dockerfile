@@ -15,4 +15,4 @@ COPY --from=build /app/apps/server/dist ./dist
 COPY --from=build /app/packages/db/src/migrations ./dist/migrations
 
 EXPOSE 3000
-CMD ["bun", "run", "dist/index.mjs"]
+CMD ["sh", "-c", "bun run dist/migrate.mjs && bun run dist/index.mjs"]
