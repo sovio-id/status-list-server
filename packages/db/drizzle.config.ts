@@ -1,8 +1,13 @@
+import { resolve } from "node:path";
+
 import dotenv from "dotenv";
 import { defineConfig } from "drizzle-kit";
 
 dotenv.config({
-  path: "../../apps/server/.env",
+  path: [
+    resolve(process.cwd(), "apps/server/.env"),
+    resolve(process.cwd(), "../../apps/server/.env"),
+  ],
 });
 
 export default defineConfig({

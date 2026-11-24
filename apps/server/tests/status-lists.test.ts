@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import app from "../src/index";
+import { app } from "../src/index";
 import { clearDb, createTestStatusListJwt } from "./helpers";
 
 const TEST_UUID = "00000000-0000-4000-8000-000000000001";
@@ -47,7 +47,10 @@ describe("POST /status-lists", () => {
   it("returns 401 when wrong API key is provided", async () => {
     const res = await app.request(
       "/status-lists",
-      json({ id: TEST_UUID, jwt: createTestStatusListJwt() }, { "x-api-key": "wrong-key" }),
+      json(
+        { id: TEST_UUID, jwt: createTestStatusListJwt() },
+        { "x-api-key": "wrong-key" },
+      ),
     );
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized" });
@@ -66,7 +69,10 @@ describe("POST /status-lists", () => {
   it("returns 400 when id is not a valid UUID", async () => {
     const res = await app.request(
       "/status-lists",
-      json({ id: "not-a-uuid", jwt: createTestStatusListJwt() }, { "x-api-key": API_KEY }),
+      json(
+        { id: "not-a-uuid", jwt: createTestStatusListJwt() },
+        { "x-api-key": API_KEY },
+      ),
     );
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -86,7 +92,10 @@ describe("POST /status-lists", () => {
   it("returns 400 when jwt is not a valid status list JWT", async () => {
     const res = await app.request(
       "/status-lists",
-      json({ id: TEST_UUID, jwt: "header.payload.sig" }, { "x-api-key": API_KEY }),
+      json(
+        { id: TEST_UUID, jwt: "header.payload.sig" },
+        { "x-api-key": API_KEY },
+      ),
     );
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: "Invalid status list JWT" });
@@ -122,7 +131,10 @@ describe("PATCH /status-lists/:list_id", () => {
       `/status-lists/${TEST_UUID}`,
       new Request("http://localhost", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-api-key": "wrong-key" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "wrong-key",
+        },
         body: JSON.stringify({ jwt: createTestStatusListJwt() }),
       }),
     );
@@ -207,7 +219,9 @@ describe("PATCH /status-lists/:list_id", () => {
       }),
     );
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "bits cannot be changed after creation" });
+    expect(await res.json()).toEqual({
+      error: "bits cannot be changed after creation",
+    });
   });
 
   it("updates status list and returns 200 with id", async () => {

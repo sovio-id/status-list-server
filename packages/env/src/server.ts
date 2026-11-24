@@ -10,6 +10,9 @@ export const env = createEnv({
       .number({ error: "PORT is required" })
       .int("PORT must be an integer")
       .positive("PORT must be a positive number"),
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

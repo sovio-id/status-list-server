@@ -22,7 +22,21 @@
     "db:generate": "bun run --filter @status-list-server/db db:generate",
     "db:migrate": "bun run --filter @status-list-server/db db:migrate",
     "style:check": "biome check .",
-    "style:fix": "biome check --write ."
+    "style:fix": "biome check --write .",
+    "loadtest": "bash load-tests/run.sh --tool all",
+    "loadtest:k6": "bash load-tests/run.sh --tool k6",
+    "loadtest:oha": "bash load-tests/run.sh --tool oha",
+    "loadtest:seed": "bun run load-tests/seed.ts",
+    "loadtest:docker": "bash load-tests/docker-run.sh --tool all",
+    "loadtest:docker:k6": "bash load-tests/docker-run.sh --tool k6",
+    "loadtest:docker:oha": "bash load-tests/docker-run.sh --tool oha",
+    "loadtest:read-sweep": "bash load-tests/run.sh --scenario read-sweep",
+    "loadtest:write-stress": "bash load-tests/run.sh --scenario write-stress",
+    "loadtest:soak": "bash load-tests/run.sh --scenario soak",
+    "loadtest:report": "bun run load-tests/scripts/report.ts",
+    "loadtest:docker:read-sweep": "bash load-tests/docker-run.sh --scenario read-sweep",
+    "loadtest:docker:write-stress": "bash load-tests/docker-run.sh --scenario write-stress",
+    "loadtest:docker:soak": "bash load-tests/docker-run.sh --scenario soak"
   },
   "dependencies": {
     "@status-list-server/env": "workspace:*",
