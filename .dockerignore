@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+dist
+**/dist
+*.tsbuildinfo
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+.env
+.env*.local
+load-tests/.run
+load-tests/results
+*.db
+*.log
+coverage

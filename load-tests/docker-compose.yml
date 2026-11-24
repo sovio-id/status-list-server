@@ -1,0 +1,75 @@
+name: status-list-loadtest
+
+services:
+  server:
+    build:
+      context: ..
+      dockerfile: load-tests/Dockerfile.server
+    environment:
+      DATABASE_URL: file:/app/loadtest.db
+      API_KEY: ${API_KEY:-loadtest-key}
+      PORT: "3000"
+      NODE_ENV: test
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          bun -e "fetch('http://localhost:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  fixtures:
+    image: oven/bun:1.4.3-alpine
+    working_dir: /lt
+    volumes:
+      - ./:/lt
+    command: ["bun", "run", "/lt/fixtures/generate.ts", "/lt/.run/fixtures"]
+
+  seed:
+    image: oven/bun:1.4.3-alpine
+    working_dir: /lt
+    volumes:
+      - ./:/lt
+    environment:
+      BASE_URL: http://server:3000
+      API_KEY: ${API_KEY:-loadtest-key}
+      SEED_DATASET: ${SEED_DATASET:-small}
+      SEED_CONCURRENCY: ${SEED_CONCURRENCY:-50}
+      SEED_TOKEN_COUNT: ${SEED_TOKEN_COUNT:-}
+      SEED_BITSTRING_COUNT: ${SEED_BITSTRING_COUNT:-}
+    depends_on:
+      server:
+        condition: service_healthy
+    command: ["bun", "run", "/lt/seed.ts"]
+
+  k6:
+    image: grafana/k6
+    user: "0:0"
+    working_dir: /lt
+    volumes:
+      - ./:/lt
+    environment:
+      BASE_URL: http://server:3000
+      API_KEY: ${API_KEY:-loadtest-key}
+      DURATION: ${DURATION:-30s}
+      VUS: ${VUS:-50}
+      RATE: ${RATE:-20}
+      WRITE_MAX_RATE: ${WRITE_MAX_RATE:-500}
+      STAGE_DURATION: ${STAGE_DURATION:-1m}
+      SOAK_WRITE_RATE: ${SOAK_WRITE_RATE:-10}
+    entrypoint: ["k6"]
+    command:
+      - run
+      - --summary-export
+      - /lt/.run/results/k6-mixed-summary.json
+      - /lt/k6/mixed.js
+    profiles: ["k6"]
+
+  oha:
+    image: ghcr.io/hatoo/oha
+    working_dir: /lt
+    volumes:
+      - ./:/lt
+    profiles: ["oha"]

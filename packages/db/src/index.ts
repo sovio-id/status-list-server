@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { createClient } from "@libsql/client";
 import { env } from "@status-list-server/env/server";
 import { drizzle } from "drizzle-orm/libsql";
@@ -15,5 +16,5 @@ const client = createClient({
 export const db = drizzle({ client, schema });
 
 await migrate(db, {
-  migrationsFolder: new URL("./migrations", import.meta.url).pathname,
+  migrationsFolder: fileURLToPath(new URL("./migrations", import.meta.url)),
 });

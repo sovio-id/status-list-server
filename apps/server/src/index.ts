@@ -5,7 +5,9 @@ import { statusListsRoute } from "./routes/status-lists";
 
 const app = new Hono();
 
-app.use(logger());
+if (env.NODE_ENV !== "test") {
+  app.use(logger());
+}
 
 app.get("/", (c) => {
   return c.html("Status List Server");
